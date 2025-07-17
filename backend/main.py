@@ -60,15 +60,16 @@ import json
 
 app = FastAPI()
 
+# CORS Middleware: adjust origins for your frontend domain if needed
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You may restrict this in production
+    allow_origins=["https://graph-dependency-app.vercel.app/"],  # In production, replace "*" with your frontend URL(s)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# In-memory graph data from CSV upload
+# In-memory storage for uploaded CSV graph data
 graph_data = {"nodes": [], "edges": []}
 
 @app.post("/upload_csv")
@@ -103,19 +104,17 @@ async def upload_csv(file: UploadFile = File(...)):
 def get_graph():
     return graph_data
 
-# ------------------------------------------
-# 🚀 NEW: Layout persistence via PostgreSQL
-# ------------------------------------------
-
-# Connect to Render PostgreSQL
+# PostgreSQL connection string from environment variable
 DB_URL = os.getenv("DATABASE_URL")
+if not DB_URL:
+    raise RuntimeError("DATABASE_URL environment variable not set")
 
 def get_connection():
     return psycopg2.connect(DB_URL)
 
-# Define the layout structure
+# Pydantic model for incoming layout data
 class LayoutRequest(BaseModel):
-    layout: Dict[str, Dict[str, float]]  # e.g., { "users": {"x": 100, "y": 200} }
+    layout: Dict[str, Dict[str, float]]  # e.g., { "table1": {"x": 100, "y": 200}, ... }
 
 @app.get("/layout")
 def get_layout():
@@ -123,10 +122,12 @@ def get_layout():
     cur = conn.cursor()
     cur.execute("SELECT layout_json FROM graph_layouts WHERE id = 1")
     result = cur.fetchone()
+    cur.close()
     conn.close()
     if result:
         return json.loads(result[0])
-    return {}
+    else:
+        return {}
 
 @app.post("/layout")
 def save_layout(layout_req: LayoutRequest):
@@ -139,5 +140,6 @@ def save_layout(layout_req: LayoutRequest):
         ON CONFLICT (id) DO UPDATE SET layout_json = EXCLUDED.layout_json
     """, (layout_str,))
     conn.commit()
+    cur.close()
     conn.close()
     return {"status": "ok"}
