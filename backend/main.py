@@ -60,16 +60,16 @@ import json
 
 app = FastAPI()
 
-# CORS Middleware: adjust origins for your frontend domain if needed
+# CORS Middleware — adjust origins for your frontend URL in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://graph-dependency-app.vercel.app/"],  # In production, replace "*" with your frontend URL(s)
+    allow_origins=["*"],  # Replace "*" with your frontend URL in production e.g. ["https://graph-dependency-app.vercel.app"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# In-memory storage for uploaded CSV graph data
+# In-memory storage of graph loaded from CSV upload
 graph_data = {"nodes": [], "edges": []}
 
 @app.post("/upload_csv")
@@ -104,17 +104,17 @@ async def upload_csv(file: UploadFile = File(...)):
 def get_graph():
     return graph_data
 
-# PostgreSQL connection string from environment variable
+# PostgreSQL connection URL from environment variable
 DB_URL = os.getenv("DATABASE_URL")
 if not DB_URL:
-    raise RuntimeError("DATABASE_URL environment variable not set")
+    raise RuntimeError("DATABASE_URL environment variable is not set.")
 
 def get_connection():
     return psycopg2.connect(DB_URL)
 
-# Pydantic model for incoming layout data
+# Pydantic model for the layout JSON data
 class LayoutRequest(BaseModel):
-    layout: Dict[str, Dict[str, float]]  # e.g., { "table1": {"x": 100, "y": 200}, ... }
+    layout: Dict[str, Dict[str, float]]  # e.g. { "table1": {"x": 100, "y": 200}, ... }
 
 @app.get("/layout")
 def get_layout():
@@ -124,10 +124,9 @@ def get_layout():
     result = cur.fetchone()
     cur.close()
     conn.close()
-    if result:
+    if result and result[0]:
         return json.loads(result[0])
-    else:
-        return {}
+    return {}
 
 @app.post("/layout")
 def save_layout(layout_req: LayoutRequest):
