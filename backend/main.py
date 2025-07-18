@@ -404,9 +404,14 @@ def get_graph(db: Session = Depends(get_db)):
 @app.post("/positions")
 def save_position(data: dict, db: Session = Depends(get_db)):
     """Update position of a single node"""
-    node_id = data.get("node_id")
-    x = data.get("x")
-    y = data.get("y")
+    # node_id = data.get("node_id")
+    # x = data.get("x")
+    # y = data.get("y")
+    node_id = data.get("id")
+    position = data.get("position", {})
+    x = position.get("x", 0)
+    y = position.get("y", 0)
+
 
     node = db.query(Node).filter(Node.id == node_id).first()
     if not node:

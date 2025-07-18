@@ -224,10 +224,15 @@ function App() {
         const { nodes: fetchedNodes, edges: fetchedEdges } = res.data;
 
         const updatedNodes = fetchedNodes.map((node) => {
-          if (node.position) {
-            positionsRef.current[node.id] = node.position;
-          }
-          return node;
+          const position = { x: node.x ?? 0, y: node.y ?? 0 };
+
+          positionsRef.current[node.id] = position;
+
+          return {
+            id: node.id,
+            data: { label: node.label },
+            position,
+          };
         });
 
         setNodes(updatedNodes);
