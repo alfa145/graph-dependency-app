@@ -13,6 +13,7 @@
     "axios": "^1.10.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-draggable": "^4.5.0",
     "reactflow": "^11.11.4"
   },
   "devDependencies": {
