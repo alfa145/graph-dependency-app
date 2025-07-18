@@ -267,8 +267,19 @@ class Node(Base):
     y = Column(Float, default=0)
     calendar_string = Column(String)
 
-    outgoing_edges = relationship("Edge", back_populates="source_node", cascade="all, delete")
-    incoming_edges = relationship("Edge", back_populates="target_node", cascade="all, delete")
+    outgoing_edges = relationship(
+        "Edge",
+        back_populates="source_node",
+        foreign_keys="Edge.source",  # specify source FK
+        cascade="all, delete"
+    )
+
+    incoming_edges = relationship(
+        "Edge",
+        back_populates="target_node",
+        foreign_keys="Edge.target",  # specify target FK
+        cascade="all, delete"
+    )
 
 
 class Edge(Base):
