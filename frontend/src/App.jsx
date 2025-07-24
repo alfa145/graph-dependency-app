@@ -309,9 +309,9 @@
 // export default App;
 
 
-/*
-* New Version 24-07-2025
-*/
+/*******************
+ * New Version 24-07-2025
+ *******************/
 
 import React, { useEffect, useState, useRef } from 'react';
 import ReactFlow, {
@@ -395,9 +395,11 @@ function App() {
 
     try {
       await axios.post(`${backendUrl}/positions`, {
-        node_id: node.id,
-        x: node.position.x,
-        y: node.position.y,
+        id: node.id,
+        position: {
+          x: node.position.x,
+          y: node.position.y,
+        },
       });
     } catch (error) {
       console.error('Failed to update node position:', error);
@@ -423,7 +425,6 @@ function App() {
         },
       });
 
-      // Re-fetch graph after upload
       await fetchGraph();
       alert('Upload successful!');
     } catch (error) {
@@ -438,27 +439,29 @@ function App() {
   if (loading) return <div>Loading graph...</div>;
 
   return (
-    <div style={{ height: '100vh', width: '100%', padding: '10px' }}>
+    <div style={{ height: '100vh', width: '100vw' }}>
       {/* Admin-only placeholder upload form */}
-      <form onSubmit={handleUpload} style={{ marginBottom: '10px' }}>
+      <form onSubmit={handleUpload} style={{ padding: '10px' }}>
         <input type="file" accept=".csv" onChange={handleFileChange} />
         <button type="submit" disabled={uploading || !file}>
           {uploading ? 'Uploading...' : 'Upload CSV'}
         </button>
       </form>
 
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onNodeDragStop={onNodeDragStop}
-        fitView
-      >
-        <MiniMap />
-        <Controls />
-        <Background color="#aaa" gap={16} />
-      </ReactFlow>
+      <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onNodeDragStop={onNodeDragStop}
+          fitView
+        >
+          <MiniMap />
+          <Controls />
+          <Background color="#aaa" gap={16} />
+        </ReactFlow>
+      </div>
     </div>
   );
 }
