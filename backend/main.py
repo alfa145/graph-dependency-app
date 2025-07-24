@@ -247,6 +247,7 @@ import os
 # === DATABASE SETUP ===
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -422,3 +423,14 @@ def save_position(data: dict, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Position updated"}
+# DELETE: Reset all nodes and edges
+@app.delete("/reset")
+def reset_graph(db: Session = Depends(get_db)):
+    try:
+        db.query(Edge).delete()
+        db.query(Node).delete()
+        db.commit()
+        return {"status": "reset complete"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
