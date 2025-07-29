@@ -57,3 +57,24 @@ form {
 .read-the-docs {
   color: #888;
 }
+.highlight-node {
+  border: 2px solid #a733ff !important;
+  background-color: #d4aaf4 !important;
+}
+
+.highlight-edge path {
+  stroke: #a733ff !important;
+  stroke-width: 2px !important;
+}
+
+.node-label {
+  font-family: 'Arial', sans-serif;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.node-detail {
+  font-family: 'Arial', sans-serif;
+  font-size: 10px;
+  text-align: left;
+  line-height: 1.4;
+}
